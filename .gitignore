@@ -1,3 +1,5 @@
 __pycache__
 env/
 active-bird-424212-m8-a68f6000f729.json
+build/
+dist/
