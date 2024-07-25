@@ -12,53 +12,63 @@ class ExcelApp:
         top_frame = tk.Frame(root)
         top_frame.pack(pady=10, fill='x')
 
-        
-        
+        # Label cho người dùng hiểu combobox là để chọn bắt đầu
+        start_label = tk.Label(top_frame, text="Start Cell:")
+        start_label.grid(row=0, column=0, padx=5)
+
+        # Combobox chọn ô bắt đầu
+        self.start_combobox = ttk.Combobox(top_frame)
+        self.start_combobox.grid(row=0, column=1, padx=5)
+
+        # Label cho người dùng hiểu combobox là để chọn kết thúc
+        end_label = tk.Label(top_frame, text="End Cell:")
+        end_label.grid(row=0, column=2, padx=5)
+
+        # Combobox chọn ô kết thúc
+        self.end_combobox = ttk.Combobox(top_frame)
+        self.end_combobox.grid(row=0, column=3, padx=5)
 
         # Add a button to load Excel file
         self.load_button = tk.Button(top_frame, text="Load Excel File", command=self.load_excel)
-        self.load_button.pack(side='left', padx=5)
-
-        # Add a button to save content with styling
-        self.save_button = tk.Button(top_frame, text="Lưu", command=self.save_content, 
-                                     font=('Arial', 12, 'bold'), bg='blue', fg='white', width=15)
-        
-
-        # Add an Entry to display and edit search content
-        self.search_content_var = tk.StringVar(value="Tuyển dụng")
-        self.search_content_entry = tk.Entry(top_frame, textvariable=self.search_content_var, width=20)
-        self.search_content_entry.pack(side='right', padx=5)
+        self.load_button.grid(row=0, column=4, padx=5)
 
         # Add a label for the search content
-        self.save_button.pack(side='right', padx=5)
         search_label = tk.Label(top_frame, text="Nội dung tìm kiếm")
-        search_label.pack(side='right', padx=5)
+        search_label.grid(row=0, column=5, padx=5)
 
-        # Create a Combobox to select sheets
-        self.sheet_selector = ttk.Combobox(top_frame)
-        self.sheet_selector.pack(side='right', padx=5)
-        self.sheet_selector.bind("<<ComboboxSelected>>", self.display_sheet)
+        # Add an Entry to display and edit search content
+        self.search_content_var = tk.StringVar(value="Tuyển dụng 2024")
+        self.search_content_entry = tk.Entry(top_frame, textvariable=self.search_content_var, width=20)
+        self.search_content_entry.grid(row=0, column=6, padx=5)
+
+        # Add a button to save content with styling
+        self.save_button = tk.Button(top_frame, text="Run", command=self.run_action, 
+                                     font=('Arial', 12, 'bold'), bg='blue', fg='white', width=15)
+        self.save_button.grid(row=0, column=9, padx=5)
 
         # Add a label for the sheet selection
         sheet_label = tk.Label(top_frame, text="Sheet:")
-        sheet_label.pack(side='right', padx=5)
+        sheet_label.grid(row=0, column=7, padx=5)
+
+        # Create a Combobox to select sheets
+        self.sheet_selector = ttk.Combobox(top_frame)
+        self.sheet_selector.grid(row=0, column=8, padx=5)
+        self.sheet_selector.bind("<<ComboboxSelected>>", self.display_sheet)
+
+        # Add a checkbox to select whether to save the file
+        self.save_file_var = tk.BooleanVar()
+        save_file_check = tk.Checkbutton(top_frame, text="Xuất file", variable=self.save_file_var)
+        save_file_check.grid(row=0, column=10, padx=5)
 
         # Frame to hold the column buttons and Treeview
         self.table_frame = tk.Frame(root)
-        self.table_frame.pack(expand=1, fill='both')
-
-        # Add an instruction label
-        self.instruction_label = tk.Label(self.table_frame, text="Vui lòng chọn cột chứa link",font=('Arial',12,'bold'),fg= 'red')
-        self.instruction_label.pack(side='top', pady=5)
-
-        self.column_buttons_frame = tk.Frame(self.table_frame)
-        self.column_buttons_frame.pack(side='top', fill='x')
+        self.table_frame.pack(padx=10, pady=10, fill='both', expand=True)
 
         self.status_label = tk.Label(root, text="", fg="red")
         self.status_label.pack(pady=20)
 
         self.tree_frame = tk.Frame(self.table_frame)
-        self.tree_frame.pack(expand=1, fill='both')
+        self.tree_frame.pack(fill='both', expand=True)
 
         # Scrollbars
         self.tree_scroll_y = ttk.Scrollbar(self.tree_frame, orient='vertical')
@@ -91,38 +101,9 @@ class ExcelApp:
     def display_sheet(self, event=None):
         sheet_name = self.sheet_selector.get()
         self.df = pd.read_excel(self.excel_file, sheet_name=sheet_name)
+        self.update_treeview()
+        self.update_comboboxes()
 
-        # Get the first ten rows of the sheet
-        first_ten_rows = self.df.head(10)
-
-        # Clear previous content
-        for widget in self.column_buttons_frame.winfo_children():
-            widget.destroy()
-
-        if self.tree:
-            self.tree.destroy()
-
-        # Create a Treeview widget to display the data
-        self.tree = ttk.Treeview(self.tree_frame, columns=list(first_ten_rows.columns), show='headings',
-                                 yscrollcommand=self.tree_scroll_y.set,
-                                 xscrollcommand=self.tree_scroll_x.set)
-        self.tree.pack(expand=1, fill='both')
-
-        # Attach scrollbars to the treeview
-        self.tree_scroll_y.config(command=self.tree.yview)
-        self.tree_scroll_x.config(command=self.tree.xview)
-
-        # Set up the treeview columns and create buttons for column names
-        for col in first_ten_rows.columns:
-            self.tree.heading(col, text=col)
-            col_width = max(first_ten_rows[col].astype(str).map(len).max(), len(col)) * 10
-            self.tree.column(col, anchor='center', width=col_width)
-            btn = tk.Button(self.column_buttons_frame, text=col, command=lambda c=col: self.column_action(c), width=col_width // 10)
-            btn.pack(side='left')
-
-        # Insert the data into the treeview
-        for row in first_ten_rows.itertuples(index=False):
-            self.tree.insert("", "end", values=row)
     def show_waiting_message(self):
         self.status_label.config(text="Processing, please wait...")
         self.root.update_idletasks()
@@ -130,20 +111,72 @@ class ExcelApp:
         self.status_label.config(text="")
         self.root.update_idletasks()
 
-    def column_action(self, column_name):
+    def update_treeview(self):
+        if self.tree:
+            self.tree.destroy()
+
+        self.tree = ttk.Treeview(self.tree_frame, columns=self.df.columns.tolist(), show='headings', yscrollcommand=self.tree_scroll_y.set, xscrollcommand=self.tree_scroll_x.set)
+        self.tree_scroll_y.config(command=self.tree.yview)
+        self.tree_scroll_x.config(command=self.tree.xview)
+        
+        for col in self.df.columns:
+            self.tree.heading(col, text=col, command=lambda _col=col: self.column_action(_col))
+            self.tree.column(col, width=100)
+
+        for row in self.df.itertuples(index=False):
+            self.tree.insert('', 'end', values=row)
+        
+        self.tree.pack(fill='both', expand=True)
+
+    def update_comboboxes(self):
+        columns = self.df.columns.tolist()
+        rows = self.df.index.tolist()
+        values = [f"{col}{row+1}" for col in columns for row in rows]
+        values = [i for i in range(len(self.df["ID"]))]
+        self.start_combobox['values'] = values
+        self.end_combobox['values'] = values
+
+    def run_action(self,start = 1,end = 3,export = True):
+        export = self.save_file_var.get()
+        print(export)
+        print(self.search_content_entry.get(),"\n",self.start_combobox.get(),self.end_combobox.get())
+        if self.start_combobox.get():
+            start = int(self.start_combobox.get())
+        if self.end_combobox.get():
+            end = int(self.end_combobox.get())
+        print(start, "\t", end)
+        from datetime import datetime
         self.show_waiting_message()
-        column_data = self.df[column_name].dropna().tolist()  # Get column data and drop NaN values
-    
-        print(self.selected_column_data,"\n")
-        for site in column_data:
-            res_js = CustomSearch.make_querry(self.search_content_entry.get(),site)
-            for i in range(len(res_js["items"])):
-                title = res_js["items"][i]["title"]
-                link = res_js["items"][i]["link"]
-                self.selected_column_data[column_name] = [title,link]  # Store column data in dictionary
-        print(self.selected_column_data[column_name])        
+        all_result = {}
+        for i, row in self.df.iterrows():
+            try:
+                if i >= start-1 and i <= end:
+                    department = row['ID']
+                    link = row['Website']
+                    res = CustomSearch.make_querry(content = self.search_content_entry.get(),
+                                                site = link)
+                    all_result[department] = res
+                    if export:
+                        CustomSearch.export_csv(name = department,data = res)
+
+            except Exception as e:
+                with open("log_error.txt","a") as file:
+                    file.write(f"{datetime.now()}: {e} \n")
+        print(all_result)
         self.hide_waiting_message()
-        messagebox.showinfo("Column Selected", f"Column '{column_name}' has been selected for saving.")
+        messagebox.showinfo("status","crawl success")
+        return all_result   
+        # column_data = self.df[column_name].dropna().tolist() # Get column data and drop NaN values    
+        # # print(self.selected_column_data,"\n")
+        # for site in column_data:
+        #     res_js = CustomSearch.make_querry(self.search_content_entry.get(),site)
+        #     for i in range(len(res_js["items"])):
+        #         title = res_js["items"][i]["title"]
+        #         link = res_js["items"][i]["link"]
+        #         self.selected_column_data[column_name] = [title,link]  # Store column data in dictionary
+        # # print(self.selected_column_data[column_name])   
+             
+
 
     def save_content(self):
         if not self.selected_column_data:
