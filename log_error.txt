@@ -19438,3 +19438,5 @@
 2024-07-25 11:11:45.345453: unsupported operand type(s) for -: 'str' and 'int' 
 2024-07-25 11:11:45.345453: unsupported operand type(s) for -: 'str' and 'int' 
 2024-07-25 11:11:45.345453: unsupported operand type(s) for -: 'str' and 'int' 
+2024-07-29 13:12:16.056597: can only concatenate str (not "float") to str 
+2024-07-29 13:12:57.387967: can only concatenate str (not "float") to str 
