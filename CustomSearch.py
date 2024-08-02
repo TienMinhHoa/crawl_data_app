@@ -17,7 +17,7 @@ def gg_search(querry,api_key = Config.API_KEY,search_engine_id = Config.SEARCH_E
     return response.json()
 
 
-def make_querry(content,site,num_of_responses = 10):
+def make_querry(content,site,num_of_responses = 30):
     querry = content+" "+"site:"+site
     search_res = []
     for i in range(1,num_of_responses,10):
@@ -26,6 +26,25 @@ def make_querry(content,site,num_of_responses = 10):
     df = pd.json_normalize(search_res)
     return df
 
+def export_latest(name,data):    
+    if os.path.exists(f"Save_info/main_data/{name}.csv"):
+        df = pd.read_csv(f"Save_info/main_data/{name}.csv")
+        titles = df['title'].values
+        for i,row in data.iterrows():
+            if row['title'] in titles:
+                continue
+            pd.concat([df,row])
+        try:
+            df.to_csv(f"Save_info/main_data/{name}.csv",index =False)
+            print("save main data sucess")
+            return True
+        except Exception as e:
+            print(e)
+            return False
+    else:
+        data.to_csv(f"Save_info/main_data/{name}.csv",index = False)
+        print("error")
+        return False
 def export_csv(name,data):
     time = datetime.now()
     date = time.day
@@ -45,14 +64,13 @@ def export_csv(name,data):
     version = len(os.listdir(day_path))
     try:
         data.to_csv(f"{day_path}/{name}_version_{str(version)}.csv")
+        export_latest(name,data)
     except Exception as e:
         print(e)
         return e
     return "Export success"
 
 
-
-
-# res = make_querry("tuyển dụng 2024",site = "http://gialam.hanoi.gov.vn")
-# print(export_csv('HA_Noi',res))
-# print(res.head())
+res = make_querry("tuyển dụng 2024",site = "http://gialam.hanoi.gov.vn")
+print(export_csv('HA_Noi',res))
+print(res.head())
