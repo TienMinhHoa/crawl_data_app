@@ -3,6 +3,11 @@ import httpx
 import Config
 from datetime import datetime
 import os
+import requests
+from bs4 import BeautifulSoup
+import warnings
+
+warnings.filterwarnings('ignore')
 
 def gg_search(querry,api_key = Config.API_KEY,search_engine_id = Config.SEARCH_ENGINE_ID,  **params):
     base_url = Config.BASE_URL
@@ -43,7 +48,7 @@ def export_latest(name,data):
             return False
     else:
         data.to_csv(f"Save_info/main_data/{name}.csv",index = False)
-        print("error")
+        # print("error")
         return False
 def export_csv(name,data):
     time = datetime.now()
@@ -70,7 +75,45 @@ def export_csv(name,data):
         return e
     return "Export success"
 
+def get_title(url):
+    response = requests.get(url,verify=False)
+    encoding = response.encoding if response.encoding else 'ISO-8859-1'
+    # response.content.decode(encoding)
+    soup = BeautifulSoup(response.content.decode(encoding), 'html.parser')
+    title = soup.find('title').text
+    return title.strip()
 
-res = make_querry("tuyển dụng 2024",site = "http://gialam.hanoi.gov.vn")
-print(export_csv('HA_Noi',res))
-print(res.head())
+# res = make_querry("tuyển dụng 2024",site = "https://moj.gov.vn")
+# print(export_csv('tuphap',res))
+# print(res.head())
+# res = pd.read_csv("Save_info/main_data/thue.csv")
+from naive_bayes import preprocess_text
+import joblib
+clf = joblib.load("Bayse.pkl")
+vectorize = joblib.load("vetorize.pkl")
+
+from tqdm import tqdm
+def filter_file(df):
+    result= []
+    for i,row in df.iterrows():
+        try:
+            title = row['title']
+            title = preprocess_text(title)
+            
+            feature = vectorize.transform([title])
+            label = clf.predict(feature)
+            # print(label)
+            if label[0] == 1:
+                if title.strip() == 'thông báo' or len(title.split(" ")) <= 5:
+                    print(f"{title} not thông báo")
+                    continue
+                print(title)
+                result.append(row)
+            else:
+                print(f"{title} not")
+        except Exception as e:
+            print(e)
+    return pd.DataFrame(result,columns=df.columns.tolist())
+# res = filter_file("Save_info/main_data/thue.csv")
+# print(res)
+# print(len(result))

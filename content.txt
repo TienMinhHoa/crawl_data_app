@@ -42,6 +42,7 @@ Quyết định công nhận kết quả thi tuyển công chức của Bộ Cô
 Thông tin tuyển dụng - Bộ Nông nghiệp và Phát triển nông thôn,0
 Thông báo tuyển dụng viên chức,1
 Thông tin tuyển dụng,0
+Thông báo,0
 Thông báo số 1419/TB-BVTV-VP ngày 02/06/2023 về việc tuyển dụng viên chức 2023,1
 Thông báo tuyển dụng Cán bộ điều phối cho Văn phòng Điều phối quan hệ đối tác cấp nước và vệ sinh,1
 Cục Bảo vệ thực vật thông báo tuyển dụng viên chức,1
@@ -57,3 +58,8 @@ BỘ LAO ĐỘNG - THƯƠNG BINH VÀ XÃ HỘI-Đắk Lắk: Tuyển dụng 10.0
 BỘ LAO ĐỘNG - THƯƠNG BINH VÀ XÃ HỘI-Hà Nội: Tuyển dụng tuyển sinh 2.984 chỉ tiêu tại Ngày hội việc làm và tư vấn hướng nghiệp Quận Cầu Giấy,0
 BỘ LAO ĐỘNG - THƯƠNG BINH VÀ XÃ HỘI-Hà Nội: Giải quyết việc làm cho hơn 100 nghìn lao động thất nghiệp,0
 BỘ LAO ĐỘNG - THƯƠNG BINH VÀ XÃ HỘI-Khai mạc kỳ thi tuyển công chức vào làm việc tại các đơn vị quản lý nhà nước thuộc Bộ Lao động – Thương binh và Xã hội năm 2024,0
+Sở Nội vụ tỉnh Khánh Hòa,0
+Sở Nội vụ tỉnh Bắc Giang,0
+Sở Nội vụ tỉnh Hải Dương,0
+bộ tài chính trang chủ tổng cục thuế,0
+bộ tài chính hỗ trợ kê khai tổng cục thuế,0

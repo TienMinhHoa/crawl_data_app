@@ -13,8 +13,17 @@ class ExcelApp:
         top_frame.pack(pady=10, fill='x')
 
         # Label cho người dùng hiểu combobox là để chọn bắt đầu
-        start_label = tk.Label(top_frame, text="Start Cell:")
+        start_label = tk.Label(top_frame, text="Start:")
         start_label.grid(row=0, column=0, padx=5)
+
+        name_label = tk.Label(top_frame,text = "Name:")
+        name_label.grid(row=1,column=0, padx= 5)
+
+        self.name_combobox = ttk.Combobox(top_frame)
+        self.name_combobox.grid(row=1,column=1,padx=5)
+
+        self.name_button = ttk.Button(top_frame,text= " ",command=self.get_action)
+        self.name_button.grid(row=1,column=2,padx=5)
 
         # Combobox chọn ô bắt đầu
         self.start_combobox = ttk.Combobox(top_frame)
@@ -83,14 +92,16 @@ class ExcelApp:
     
     def load_excel(self):
         # Open a file dialog to select an Excel file
-        file_path = filedialog.askopenfilename(filetypes=[("Excel files", "*.xlsx;*.xls")])
-        
+        file_path = filedialog.askopenfilename(filetypes=[("Excel files", "*.xlsx;*.xls;*.csv")])
+        print(file_path)
         if not file_path:
+            print("not")
             return
         
         # Read the Excel file using Pandas to get sheet names
         try:
             self.excel_file = pd.ExcelFile(file_path)
+            # self.df = pd.read_excel(file_path)
             sheet_names = self.excel_file.sheet_names
             self.sheet_selector['values'] = sheet_names
             self.sheet_selector.current(0)  # Select the first sheet by default
@@ -101,8 +112,14 @@ class ExcelApp:
     def display_sheet(self, event=None):
         sheet_name = self.sheet_selector.get()
         self.df = pd.read_excel(self.excel_file, sheet_name=sheet_name)
-        self.update_treeview()
+        # res = CustomSearch.make_querry(content = self.search_content_entry.get(),
+        #                                       site = link)
+        # res = CustomSearch.filter_file(res)
+        # self.df = res
+        
         self.update_comboboxes()
+        # if self.start_combobox.get():
+        #     self.update_treeview(self.start_combobox.get())
 
     def show_waiting_message(self):
         self.status_label.config(text="Processing, please wait...")
@@ -111,30 +128,46 @@ class ExcelApp:
         self.status_label.config(text="")
         self.root.update_idletasks()
 
-    def update_treeview(self):
+    def update_treeview(self,name):
+        # for i, row in self.df.iterrows():
+        #     if(name == row["NAME"]):
+        #         id = int(row["ID"])
+        # id = str(91001)
+        id = str(self.df[self.df["NAME"] == name]["ID"].values[0])
+        
+
         if self.tree:
             self.tree.destroy()
+        path = f"Save_info/main_data/{id}.csv"
+        DF = pd.read_csv(path)
 
-        self.tree = ttk.Treeview(self.tree_frame, columns=self.df.columns.tolist(), show='headings', yscrollcommand=self.tree_scroll_y.set, xscrollcommand=self.tree_scroll_x.set)
+        self.tree = ttk.Treeview(self.tree_frame, columns=DF.columns.tolist(), show='headings', yscrollcommand=self.tree_scroll_y.set, xscrollcommand=self.tree_scroll_x.set)
         self.tree_scroll_y.config(command=self.tree.yview)
         self.tree_scroll_x.config(command=self.tree.xview)
         
-        for col in self.df.columns:
+        for col in DF.columns:
             self.tree.heading(col, text=col, command=lambda _col=col: self.column_action(_col))
             self.tree.column(col, width=100)
+        print(DF["link"].values)
 
-        for row in self.df.itertuples(index=False):
+        for row in DF.itertuples(index=False):
             self.tree.insert('', 'end', values=row)
         
         self.tree.pack(fill='both', expand=True)
 
     def update_comboboxes(self):
-        columns = self.df.columns.tolist()
-        rows = self.df.index.tolist()
-        values = [f"{col}{row+1}" for col in columns for row in rows]
-        values = [i for i in range(len(self.df["ID"]))]
-        self.start_combobox['values'] = values
-        self.end_combobox['values'] = values
+        
+        # values = [f"{col}{row+1}" for col in columns for row in rows]
+        id = [i for i in self.df["ID"]]
+        name = [i for i in self.df["NAME"]]
+        
+        self.start_combobox['values'] = id
+        self.end_combobox['values'] = id
+        self.name_combobox['values'] = name
+
+    def get_action(self):
+        self.update_comboboxes()
+        self.update_treeview(self.name_combobox.get())
 
     def run_action(self,start = 1,end = 3,export = True):
         export = self.save_file_var.get()
@@ -148,14 +181,21 @@ class ExcelApp:
         from datetime import datetime
         self.show_waiting_message()
         all_result = {}
+
+        ID = self.df["ID"].tolist()
+        start = ID.index(start)
+        end = ID.index(end)
+        
         for i, row in self.df.iterrows():
             try:
-                if i >= start-1 and i <= end:
+                if i >= start and i <= end:
                     department = row['ID']
                     link = row['Website']
                     res = CustomSearch.make_querry(content = self.search_content_entry.get(),
-                                                site = link)
+                                              site = link)
+                    res = CustomSearch.filter_file(res)
                     all_result[department] = res
+                    
                     if export:
                         CustomSearch.export_csv(name = department,data = res)
 
@@ -175,33 +215,13 @@ class ExcelApp:
         #         link = res_js["items"][i]["link"]
         #         self.selected_column_data[column_name] = [title,link]  # Store column data in dictionary
         # # print(self.selected_column_data[column_name])   
+    def update_treeview_link(df):
+        text_box = ttk.Notebook(df)
+
              
 
 
-    def save_content(self):
-        if not self.selected_column_data:
-            messagebox.showwarning("No Data", "No column data selected to save.")
-            return
-        
-        # file_path = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("Text files", "*.txt"), ("CSV files", "*.csv")])
-        file_path = 'link_web.txt'
-        if file_path:
-            # Save column data to the selected file
-            with open(file_path, 'w', encoding='utf-8') as file:
-                if file_path.endswith('.txt'):
-                    for col_name, col_data in self.selected_column_data.items():
-                        file.write(f"{col_name}:\n")
-                        for item in col_data:
-                            file.write(f"{item}\n")
-                        file.write("\n")
-                elif file_path.endswith('.csv'):
-                    for col_name, col_data in self.selected_column_data.items():
-                        file.write(f"{col_name},\n")
-                        pd.Series(col_data).to_csv(file, index=False, header=False)
-                        file.write("\n")
-            
-            messagebox.showinfo("Success", f"Selected column data saved to {file_path}")
-            self.selected_column_data.clear()  # Clear the dictionary after saving
+
 
 if __name__ == "__main__":
     root = tk.Tk()
