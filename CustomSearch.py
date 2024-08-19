@@ -90,8 +90,8 @@ def get_title(url):
 # res = pd.read_csv("Save_info/main_data/thue.csv")
 from naive_bayes import preprocess_text
 import joblib
-clf = joblib.load("Bayse.pkl")
-vectorize = joblib.load("vetorize.pkl")
+clf = joblib.load("model_AI/filter_title/Bayse.pkl")
+vectorize = joblib.load("model_AI/filter_title/vetorize.pkl")
 
 from tqdm import tqdm
 def filter_file(df):

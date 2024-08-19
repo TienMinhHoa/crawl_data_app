@@ -206,12 +206,14 @@ class ExcelApp:
                                               site = link)
                     res = CustomSearch.filter_file(res)
                     temp_res = {}            
-                    temp_res = pd.DataFrame(temp_res)
+                    
                             
                     temp_res['ID'] = department
+                    
                     temp_res['title'] = res['title']
                     temp_res['link'] = res['link']
                     temp_res['file_exists'] = None 
+                    temp_res = pd.DataFrame(temp_res)
                     from tqdm import tqdm
                     for j,r in tqdm(res.iterrows()):
                         url =r['link']
@@ -225,15 +227,15 @@ class ExcelApp:
                     
                     all_result[department] = res
                     print(f"\n thoi gian chay 1 trang web la {time.time() - sta_time}\n")
-                    if export:
-                        CustomSearch.export_csv(name = department,data = df_res)
                     
                     
-
+                    
+                
             except Exception as e:
                 with open("log_error.txt","a") as file:
                     file.write(f"{datetime.now()}: {e} \n")
-        CustomSearch.export_csv(name="main",data=df_res)           
+        if export:
+                        CustomSearch.export_csv(name="main",data=df_res)           
         print(f" thoi gian chay het {end - start } link la {time.time() - start_time}")
         
         print(all_result)
