@@ -6,7 +6,7 @@ import os
 import requests
 from bs4 import BeautifulSoup
 import warnings
-
+import time 
 warnings.filterwarnings('ignore')
 
 def gg_search(querry,api_key = Config.API_KEY,search_engine_id = Config.SEARCH_ENGINE_ID,  **params):
@@ -23,6 +23,7 @@ def gg_search(querry,api_key = Config.API_KEY,search_engine_id = Config.SEARCH_E
 
 
 def make_querry(content,site,num_of_responses = 30):
+    
     querry = content+" "+"site:"+site
     search_res = []
     for i in range(1,num_of_responses,10):
@@ -114,6 +115,31 @@ def filter_file(df):
         except Exception as e:
             print(e)
     return pd.DataFrame(result,columns=df.columns.tolist())
+def check_file_exists(url):
+    from urllib.parse import urljoin    
+        
+    try:
+        response = requests.get(url, timeout=10, verify=False)
+        response.raise_for_status()  # Raise an exception for HTTP errors
+        soup = BeautifulSoup(response.text, 'html.parser')
+        # Tìm tất cả các liên kết trong trang web
+        for link in soup.find_all('a', href=True):
+            href = link['href']
+            # Chuyển đổi URL tương đối sang URL đầy đủ
+            full_url = urljoin(url, href)
+            
+            if '.pdf' in full_url:
+                return full_url
+                    # Ngừng kiểm tra phần mở rộng khác nếu đã tìm thấy
+            
+
+    except requests.RequestException as e:
+        print(f"Không thể truy cập URL {url}: {e}")
+            
+    return 0
 # res = filter_file("Save_info/main_data/thue.csv")
+# url = 'https://mod.gov.vn/vn/chi-tiet/sa-ttsk/sa-tt-qpan/c5a26f5b-301f-43d3-b158-29dc25ab4c86'
+# print(check_file_exists(url=url))
+
 # print(res)
 # print(len(result))

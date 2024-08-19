@@ -2,6 +2,7 @@ import pandas as pd
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 import CustomSearch
+import time
 
 class ExcelApp:
     def __init__(self, root):
@@ -181,40 +182,65 @@ class ExcelApp:
         from datetime import datetime
         self.show_waiting_message()
         all_result = {}
+        df_res = {
+            'ID': [],
+            'title':[],
+            'link':[],
+            'file_exists': []
+        }
+        df_res= pd.DataFrame(df_res)
 
         ID = self.df["ID"].tolist()
         start = ID.index(start)
         end = ID.index(end)
+        start_time = time.time()
+
         
         for i, row in self.df.iterrows():
             try:
                 if i >= start and i <= end:
+                    sta_time = time.time()
                     department = row['ID']
                     link = row['Website']
                     res = CustomSearch.make_querry(content = self.search_content_entry.get(),
                                               site = link)
                     res = CustomSearch.filter_file(res)
-                    all_result[department] = res
+                    temp_res = {}            
+                    temp_res = pd.DataFrame(temp_res)
+                            
+                    temp_res['ID'] = department
+                    temp_res['title'] = res['title']
+                    temp_res['link'] = res['link']
+                    temp_res['file_exists'] = None 
+                    from tqdm import tqdm
+                    for j,r in tqdm(res.iterrows()):
+                        url =r['link']
+                        
+                        temp_res.at[j,'file_exists'] = CustomSearch.check_file_exists(url)
+                    # print(temp_res)
+
                     
+                    
+                    df_res = pd.concat([df_res,temp_res],ignore_index=True)
+                    
+                    all_result[department] = res
+                    print(f"\n thoi gian chay 1 trang web la {time.time() - sta_time}\n")
                     if export:
-                        CustomSearch.export_csv(name = department,data = res)
+                        CustomSearch.export_csv(name = department,data = df_res)
+                    
+                    
 
             except Exception as e:
                 with open("log_error.txt","a") as file:
                     file.write(f"{datetime.now()}: {e} \n")
+        CustomSearch.export_csv(name="main",data=df_res)           
+        print(f" thoi gian chay het {end - start } link la {time.time() - start_time}")
+        
         print(all_result)
         self.hide_waiting_message()
         messagebox.showinfo("status","crawl success")
         return all_result   
-        # column_data = self.df[column_name].dropna().tolist() # Get column data and drop NaN values    
-        # # print(self.selected_column_data,"\n")
-        # for site in column_data:
-        #     res_js = CustomSearch.make_querry(self.search_content_entry.get(),site)
-        #     for i in range(len(res_js["items"])):
-        #         title = res_js["items"][i]["title"]
-        #         link = res_js["items"][i]["link"]
-        #         self.selected_column_data[column_name] = [title,link]  # Store column data in dictionary
-        # # print(self.selected_column_data[column_name])   
+         
     def update_treeview_link(df):
         text_box = ttk.Notebook(df)
 
