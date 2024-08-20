@@ -137,6 +137,8 @@ def check_file_exists(url):
         print(f"Không thể truy cập URL {url}: {e}")
             
     return 0
+def filter_content(df):
+    
 # res = filter_file("Save_info/main_data/thue.csv")
 # url = 'https://mod.gov.vn/vn/chi-tiet/sa-ttsk/sa-tt-qpan/c5a26f5b-301f-43d3-b158-29dc25ab4c86'
 # print(check_file_exists(url=url))
