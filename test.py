@@ -29,6 +29,7 @@ def get_article_content(url):
     #     return None
 
 # Ví dụ sử dụng
-url = "https://thads.moj.gov.vn/noidung/thongbao/Pages/tbbc.aspx"
+url = "https://www.mpi.gov.vn/portal/Pages/2024-8-2/Chi-tieu-tuyen-dung-vien-chuc-cua-Vien-Nghien-cuu-h8809q.aspx"
 content,paras,title = get_article_content(url)
-print(title)
+print(content.strip())
+print(title.strip())
