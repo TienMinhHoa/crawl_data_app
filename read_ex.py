@@ -208,7 +208,7 @@ class ExcelApp:
                     temp_res = {}            
                     
                             
-                    temp_res['ID'] = department
+                    temp_res['ID'] = int(department)
                     
                     temp_res['title'] = res['title']
                     temp_res['link'] = res['link']
