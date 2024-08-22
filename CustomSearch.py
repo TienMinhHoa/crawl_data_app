@@ -123,23 +123,33 @@ def check_file_exists(url):
         response.raise_for_status()  # Raise an exception for HTTP errors
         soup = BeautifulSoup(response.text, 'html.parser')
         # Tìm tất cả các liên kết trong trang web
+        list_pdf = []
         for link in soup.find_all('a', href=True):
             href = link['href']
             # Chuyển đổi URL tương đối sang URL đầy đủ
             full_url = urljoin(url, href)
             
             if '.pdf' in full_url:
-                return full_url
+                list_pdf.append(full_url)
                     # Ngừng kiểm tra phần mở rộng khác nếu đã tìm thấy
             
 
     except requests.RequestException as e:
-        print(f"Không thể truy cập URL {url}: {e}")
-            
-    return 0
+        print(f"Không thể truy cập URL {url}: {e}")       
+    return list_pdf
 # res = filter_file("Save_info/main_data/thue.csv")
-# url = 'https://mod.gov.vn/vn/chi-tiet/sa-ttsk/sa-tt-qpan/c5a26f5b-301f-43d3-b158-29dc25ab4c86'
-# print(check_file_exists(url=url))
+url = 'https://thads.moj.gov.vn/tphochiminh/noidung/thongbao/lists/thongbao/view_detail.aspx?itemid=531'
+data = {
+    'stt': [1, 2, 3],
+    'id' : ['q','b','v']
+    
+}
+data['file'] = None
+df = pd.DataFrame(data=data)
+df.at[1,'file'] = check_file_exists(url=url)
+
+print(df)
+df.to_csv("main.csv")
 
 # print(res)
 # print(len(result))
