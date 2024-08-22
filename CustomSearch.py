@@ -90,8 +90,8 @@ def get_title(url):
 # res = pd.read_csv("Save_info/main_data/thue.csv")
 from naive_bayes import preprocess_text
 import joblib
-clf = joblib.load("model_AI/filter_title/Bayse.pkl")
-vectorize = joblib.load("model_AI/filter_title/vetorize.pkl")
+title_clf = joblib.load("model_AI/filter_title/Bayse.pkl")
+title_vectorize = joblib.load("model_AI/filter_title/vetorize.pkl")
 
 from tqdm import tqdm
 def filter_file(df):
@@ -101,8 +101,8 @@ def filter_file(df):
             title = row['title']
             title = preprocess_text(title)
             
-            feature = vectorize.transform([title])
-            label = clf.predict(feature)
+            feature = title_vectorize.transform([title])
+            label = title_clf.predict(feature)
             # print(label)
             if label[0] == 1:
                 if title.strip() == 'thông báo' or len(title.split(" ")) <= 5:
@@ -129,14 +129,47 @@ def check_file_exists(url):
             # Chuyển đổi URL tương đối sang URL đầy đủ
             full_url = urljoin(url, href)
             
-            if '.pdf' in full_url:
+
+            if '.pdf' in full_url or '.rar' in full_url or '.zip' in full_url:
                 list_pdf.append(full_url)
-                    # Ngừng kiểm tra phần mở rộng khác nếu đã tìm thấy
+
             
 
     except requests.RequestException as e:
+
         print(f"Không thể truy cập URL {url}: {e}")       
     return list_pdf
+
+            
+
+from test import get_article_content
+from naive_content import  emphasize_hot_words
+content_clf = joblib.load("model_AI/filter_content/Bayes.pkl")
+content_vectorize = joblib.load("model_AI/filter_content/vectorize.pkl")
+def filter_content(url):
+    content  = get_article_content(url)
+    content = preprocess_text(content)
+    content = emphasize_hot_words(content)
+    label = content_clf(content_vectorize([content]))[0]
+    return label
+
+def filter_df(df):
+    result= []
+    for i,row in df.iterrows():
+        try:
+            url = row['url']
+            label = filter_content(url)
+            # print(label)
+            if label == 1:
+                result.append(row)
+            else:
+                pass
+        except Exception as e:
+            print(e)
+    return pd.DataFrame(result,columns=df.columns.tolist())
+    
+    
+
 # res = filter_file("Save_info/main_data/thue.csv")
 url = 'https://thads.moj.gov.vn/tphochiminh/noidung/thongbao/lists/thongbao/view_detail.aspx?itemid=531'
 data = {
