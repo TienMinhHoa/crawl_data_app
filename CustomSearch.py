@@ -7,8 +7,9 @@ import requests
 from bs4 import BeautifulSoup
 import warnings
 import time 
+from multiprocessing import Pool
 warnings.filterwarnings('ignore')
-
+from naive_content import  emphasize_hot_words
 def gg_search(querry,api_key = Config.API_KEY,search_engine_id = Config.SEARCH_ENGINE_ID,  **params):
     base_url = Config.BASE_URL
     params = {
@@ -76,24 +77,38 @@ def export_csv(name,data):
         return e
     return "Export success"
 
-def get_title(url):
-    response = requests.get(url,verify=False)
-    encoding = response.encoding if response.encoding else 'ISO-8859-1'
-    # response.content.decode(encoding)
-    soup = BeautifulSoup(response.content.decode(encoding), 'html.parser')
-    title = soup.find('title').text
-    return title.strip()
 
-# res = make_querry("tuyển dụng 2024",site = "https://moj.gov.vn")
-# print(export_csv('tuphap',res))
-# print(res.head())
-# res = pd.read_csv("Save_info/main_data/thue.csv")
 from naive_bayes import preprocess_text
 import joblib
 title_clf = joblib.load("model_AI/filter_title/Bayse.pkl")
 title_vectorize = joblib.load("model_AI/filter_title/vetorize.pkl")
-
+content_clf = joblib.load("model_AI/filter_content/Bayes.pkl")
+content_vectorize = joblib.load("model_AI/filter_content/vectorize.pkl")
 from tqdm import tqdm
+
+# def check_double(url):
+def filter_url(url):
+    response = requests.get(url, verify = False)
+    encoding = response.encoding if response.encoding else 'ISO-8859-1' 
+    soup = BeautifulSoup(response.content.decode(encoding), 'html.parser')
+    
+    title = soup.find('title').text
+    title = preprocess_text(title)
+    
+    title_feature = title_vectorize.transform([title])
+    title_label = title_clf.predict(title_feature)
+    if title_label[0] == 0:
+        return 0
+    paragraphs = soup.find_all('p')
+    headings = soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])
+    article_content = ' '.join([para.text for para in paragraphs])
+    heads = ' '.join([head.text for head in headings])
+    content = " ".join(article_content.split()) +" "+ " ".join(heads.split())
+    content = preprocess_text(content)
+    content = emphasize_hot_words(content)
+    content_feature = content_vectorize.transform([content])
+    content_label = content_clf.predict(content_feature)
+    return content_label
 def filter_file(df):
     result= []
     for i,row in df.iterrows():
@@ -115,9 +130,8 @@ def filter_file(df):
         except Exception as e:
             print(e)
     return pd.DataFrame(result,columns=df.columns.tolist())
+from urllib.parse import urljoin   
 def check_file_exists(url):
-    from urllib.parse import urljoin    
-        
     try:
         response = requests.get(url, timeout=10, verify=False)
         response.raise_for_status()  # Raise an exception for HTTP errors
@@ -128,61 +142,27 @@ def check_file_exists(url):
             href = link['href']
             # Chuyển đổi URL tương đối sang URL đầy đủ
             full_url = urljoin(url, href)
-            
-
             if '.pdf' in full_url or '.rar' in full_url or '.zip' in full_url:
                 list_pdf.append(full_url)
 
-            
-
     except requests.RequestException as e:
 
-        print(f"Không thể truy cập URL {url}: {e}")       
+        # print(f"Không thể truy cập URL {url}: {e}")    
+        return [0]   
     return list_pdf
 
-            
 
-from test import get_article_content
-from naive_content import  emphasize_hot_words
-content_clf = joblib.load("model_AI/filter_content/Bayes.pkl")
-content_vectorize = joblib.load("model_AI/filter_content/vectorize.pkl")
-def filter_content(url):
-    content  = get_article_content(url)
-    content = preprocess_text(content)
-    content = emphasize_hot_words(content)
-    label = content_clf(content_vectorize([content]))[0]
-    return label
 
-def filter_df(df):
-    result= []
-    for i,row in df.iterrows():
-        try:
-            url = row['url']
-            label = filter_content(url)
-            # print(label)
-            if label == 1:
-                result.append(row)
-            else:
-                pass
-        except Exception as e:
-            print(e)
-    return pd.DataFrame(result,columns=df.columns.tolist())
-    
+
     
 
+if __name__=="__main__":
 # res = filter_file("Save_info/main_data/thue.csv")
 # url = 'https://thads.moj.gov.vn/tphochiminh/noidung/thongbao/lists/thongbao/view_detail.aspx?itemid=531'
-# data = {
-#     'stt': [1, 2, 3],
-#     'id' : ['q','b','v']
-    
-# }
-# data['file'] = None
-# df = pd.DataFrame(data=data)
-# df.at[1,'file'] = check_file_exists(url=url)
 
-# print(df)
-# df.to_csv("main.csv")
+    df = pd.read_csv("D:/pypy/Crawl_data/Save_info/2024/8/20/main_version_0.csv")
+    urls = df['link'].tolist()
+    with Pool(2) as pool:
+        res = list(tqdm(pool.imap(check_file_exists,urls),total=len(urls)))
+    print(res)
 
-# print(res)
-# print(len(result))

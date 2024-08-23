@@ -5,10 +5,7 @@ import os
 def get_article_content(url):
     try:
         response = requests.get(url, verify = False)
-        # print(response.encoding)
         encoding = response.encoding if response.encoding else 'ISO-8859-1' 
-        # print(encoding)
-        # print("crawl succes")
         soup = BeautifulSoup(response.content.decode(encoding), 'html.parser')
         paragraphs = soup.find_all('p')
         headings = soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])
@@ -29,7 +26,15 @@ def get_article_content(url):
         return heads+" "+article_content
     except:
         return url
-
+def get_title(url):
+    try:
+        response = requests.get(url, verify = False)
+        encoding = response.encoding if response.encoding else 'ISO-8859-1' 
+        soup = BeautifulSoup(response.content.decode(encoding), 'html.parser')
+        title = soup.find_all('title').text
+        return title
+    except:
+        return "Not relevant"
 # Ví dụ sử dụng
 # url = "https://moha.gov.vn/thong-bao/ke-hoach-so-1728kh-bnv-ngay-2932024-cua-bo-noi-vu-thuc-hien-cong-tac-phong-chong-tham-nhung-tieu-cuc-nam-2024-1907.html"
 # content = get_article_content(url)
