@@ -3,6 +3,8 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 import CustomSearch
 import time
+import read_sheet
+
 
 class ExcelApp:
     def __init__(self, root):
@@ -90,6 +92,7 @@ class ExcelApp:
         self.excel_file = None
         self.df = None
         self.selected_column_data = {}  # Dictionary to store selected column data
+        
     
     def load_excel(self):
         # Open a file dialog to select an Excel file
@@ -193,6 +196,7 @@ class ExcelApp:
         ID = self.df["ID"].tolist()
         start = ID.index(start)
         end = ID.index(end)
+
         start_time = time.time()
 
         
@@ -205,28 +209,43 @@ class ExcelApp:
                     res = CustomSearch.make_querry(content = self.search_content_entry.get(),
                                               site = link)
                     res = CustomSearch.filter_file(res)
+                    # nối df nhỏ thành 1 df lớn 
                     temp_res = {}            
-                    
-                            
-                    temp_res['ID'] = int(department)
-                    
+                    temp_res['ID'] = department                    
                     temp_res['title'] = res['title']
                     temp_res['link'] = res['link']
                     temp_res['file_exists'] = None 
                     temp_res = pd.DataFrame(temp_res)
                     from tqdm import tqdm
-                    for j,r in tqdm(res.iterrows()):
-                        url =r['link']
+                    #kiểm tra từng link xem có file đính kèm không
+                    try:
+                        for j,r in tqdm(res.iterrows()):
+                            url =r['link'] 
+                            lists = CustomSearch.check_file_exists(url)                    
+                            temp_res.at[j,'file_exists'] = read_sheet.format_links_as_hyperlinks(lists)
+
+                        print(temp_res)
+                    except Exception as e:
+                        print(f"loi : {e}")
+                    from gspread_dataframe import set_with_dataframe
+                    try:
                         
-                        temp_res.at[j,'file_exists'] = CustomSearch.check_file_exists(url)
-                    # print(temp_res)
+                        sheet = read_sheet.connect_to_sheet()                        
+                        last_row = len(sheet.get_all_values())
+                        print(f"\n last row : {last_row}")
+                        
+                        set_with_dataframe(sheet,temp_res,row= last_row+1, include_column_header = False)
+                    except Exception as e:
+                        print(f"er: {e}")
+
+                    
 
                     
                     
-                    df_res = pd.concat([df_res,temp_res],ignore_index=True)
+                    # df_res = pd.concat([df_res,temp_res],ignore_index=True)
                     
                     all_result[department] = res
-                    print(f"\n thoi gian chay 1 trang web la {time.time() - sta_time}\n")
+                    # print(f"\n thoi gian chay 1 trang web la {time.time() - sta_time}\n")
                     
                     
                     

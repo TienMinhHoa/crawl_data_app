@@ -171,18 +171,18 @@ def filter_df(df):
     
 
 # res = filter_file("Save_info/main_data/thue.csv")
-url = 'https://thads.moj.gov.vn/tphochiminh/noidung/thongbao/lists/thongbao/view_detail.aspx?itemid=531'
-data = {
-    'stt': [1, 2, 3],
-    'id' : ['q','b','v']
+# url = 'https://thads.moj.gov.vn/tphochiminh/noidung/thongbao/lists/thongbao/view_detail.aspx?itemid=531'
+# data = {
+#     'stt': [1, 2, 3],
+#     'id' : ['q','b','v']
     
-}
-data['file'] = None
-df = pd.DataFrame(data=data)
-df.at[1,'file'] = check_file_exists(url=url)
+# }
+# data['file'] = None
+# df = pd.DataFrame(data=data)
+# df.at[1,'file'] = check_file_exists(url=url)
 
-print(df)
-df.to_csv("main.csv")
+# print(df)
+# df.to_csv("main.csv")
 
 # print(res)
 # print(len(result))

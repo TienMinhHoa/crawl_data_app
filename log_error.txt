@@ -7,3 +7,31 @@
 2024-08-19 16:28:26.272658: 'int' object has no attribute 'astype' 
 2024-08-19 16:28:27.778632: 'int' object has no attribute 'astype' 
 2024-08-19 16:28:29.088557: 'int' object has no attribute 'astype' 
+2024-08-22 16:03:08.947212: 'NoneType' object has no attribute 'append_row' 
+2024-08-22 16:04:09.220499: 'NoneType' object has no attribute 'append_row' 
+2024-08-22 16:04:51.159078: 'NoneType' object has no attribute 'append_row' 
+2024-08-22 17:35:29.451435: object of type 'method' has no len() 
+2024-08-22 17:36:36.273352: object of type 'method' has no len() 
+2024-08-22 17:36:51.929719: object of type 'method' has no len() 
+2024-08-22 17:40:26.942349: object of type 'method' has no len() 
+2024-08-22 17:41:22.140714: object of type 'method' has no len() 
+2024-08-22 17:42:30.272593: cannot access local variable 'list_pdf' where it is not associated with a value 
+2024-08-22 17:43:39.965866: object of type 'method' has no len() 
+2024-08-22 17:44:06.221681: object of type 'method' has no len() 
+2024-08-22 17:45:55.924858: object of type 'method' has no len() 
+2024-08-22 17:46:47.245381: object of type 'method' has no len() 
+2024-08-22 17:53:00.967474: object of type 'method' has no len() 
+2024-08-22 17:53:18.593062: object of type 'method' has no len() 
+2024-08-22 17:54:50.892008: object of type 'method' has no len() 
+2024-08-22 17:55:51.613744: object of type 'method' has no len() 
+2024-08-22 17:59:49.353704: object of type 'method' has no len() 
+2024-08-22 18:00:47.840089: object of type 'method' has no len() 
+2024-08-22 18:04:34.417210: object of type 'method' has no len() 
+2024-08-22 18:07:17.511849: object of type 'method' has no len() 
+2024-08-22 18:13:39.005996: object of type 'method' has no len() 
+2024-08-22 18:18:13.241249: object of type 'method' has no len() 
+2024-08-22 18:21:01.542921: object of type 'method' has no len() 
+2024-08-22 18:22:31.557231: object of type 'method' has no len() 
+2024-08-22 18:24:55.143179: object of type 'method' has no len() 
+2024-08-22 19:23:20.013607: module 'read_sheet' has no attribute 'format_links_as_hyperlinks' 
+2024-08-22 19:26:16.885448: module 'read_sheet' has no attribute 'format_links_as_hyperlinks' 
