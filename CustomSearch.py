@@ -122,8 +122,6 @@ if __name__=="__main__":
     q = CustomSearch()
     db = DatabaseConnector(server="Admin", database="CrawlDB",username="sa",password="utequyen2372004",use_windows_auth=False)
     db.connect()
-# res = filter_file("Save_info/main_data/thue.csv")
-# url = 'https://thads.moj.gov.vn/tphochiminh/noidung/thongbao/lists/thongbao/view_detail.aspx?itemid=531'
     df = pd.read_excel("backend_data/data.xlsx")
     urls = df['Website'].tolist()
     id = df['ID'].tolist()
