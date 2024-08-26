@@ -2,10 +2,11 @@ import requests
 from bs4 import BeautifulSoup
 import os
 
+
 def get_article_content(url):
     try:
-        response = requests.get(url, verify = False)
-        encoding = response.encoding if response.encoding else 'ISO-8859-1' 
+        response = requests.get(url, verify=False)
+        encoding = response.encoding if response.encoding else 'ISO-8859-1'
         soup = BeautifulSoup(response.content.decode(encoding), 'html.parser')
         paragraphs = soup.find_all('p')
         headings = soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])
@@ -15,7 +16,7 @@ def get_article_content(url):
         article_content = ' '.join([para.text for para in paragraphs])
         heads = ' '.join([head.text for head in headings])
         # print("############################")
-        
+
         if not os.path.exists("data_ai_content"):
             os.mkdir("data_ai_content")
         article_content = " ".join(article_content.split())
@@ -26,10 +27,12 @@ def get_article_content(url):
         return heads+" "+article_content
     except:
         return url
+
+
 def get_title(url):
     try:
-        response = requests.get(url, verify = False)
-        encoding = response.encoding if response.encoding else 'ISO-8859-1' 
+        response = requests.get(url, verify=False)
+        encoding = response.encoding if response.encoding else 'ISO-8859-1'
         soup = BeautifulSoup(response.content.decode(encoding), 'html.parser')
         title = soup.find_all('title').text
         return title
