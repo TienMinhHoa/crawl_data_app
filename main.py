@@ -10,32 +10,36 @@ from custom_search import CustomSearch, FilterAndSave
 if __name__ == "__main__":
     getter = FilterAndSave()
     q = CustomSearch()
-    db = DatabaseConnector(server="localhost",
-                           database="crawldb",
-                           username="root",
-                           password="nghia",
-                           port=3307)
-    db.connect()
-    df = pd.read_excel("backend_data/data.xlsx")
-    urls = df['Website'].tolist()
-    id = df['ID'].tolist()
-    res = httpx.get(f'{q.ROOT_API}/domain?page=0&limit=6')
-    breakpoint()
-    res_json = json.loads(res.text)['data']
-    for i, url in tqdm(enumerate(urls)):
+    # print(q.make_query(content="tuyển dụng 2024",site="https://www.longbien.hanoi.gov.vn/"))
+    # breakpoint
+    response = httpx.get('http://localhost:8888/api/domain?page=0&limit=1')
+    # breakpoint()
+    res_json = json.loads(response.text)['data']
+    id = [idx['id'] for idx in res_json]
+    urls = [idx['urlDomain'] for idx in res_json]
+    
+    print(len(urls))
+    for  url in tqdm(urls):
+        res = []
         try:
             sub_df = q.make_query(
                 content="tuyển dụng 2024", site=url, num_of_responses=15)
-        except Exception:
+        except Exception as e:
+            print(f"make query failed {e}")
             continue
 
         try:
-            with Pool(2) as pool:
-                res = list(pool.imap(getter.get_info_url,
-                           sub_df['link'].tolist()))
-        except Exception:
+            # with Pool(1) as pool:
+            #     res = list(pool.imap(getter.get_info_url,
+            #                sub_df['link'].tolist()))
+            for url in sub_df['link'].tolist():
+                res.append(getter.get_info_url(url))
+        except Exception as e:
+            # print(f"get info failed {e}")
+            # print(sub_df)
+            # print(url)
             continue
-
+        # print(res)
         for index, tmp in enumerate(res):
             id_d = id[index]
             if tmp is None:
@@ -43,5 +47,11 @@ if __name__ == "__main__":
             link = sub_df['link'].tolist()[index]
             attachment = '\n'.join(tmp)
             title = getter.get_title(link)
-            db.insert_data('crawledlinks', domain_id=id_d, crawled_link=link,
-                           link_title=title, attachment_url=attachment)
+            data = {
+                    "crawledLink":link,
+                    "linkTitle":title,
+                    "attachmentUrl":attachment,
+                    "domainId":id_d
+                    }
+            print(data)
+            httpx.post("http://localhost:8888/api/crawled-link",json = data)

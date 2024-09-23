@@ -93,18 +93,25 @@ class FilterAndSave:
             list_pdf = []
             for link in soup.find_all('a', href=True):
                 href = link['href']
-                full_url = urljoin(url, href)
+                if "https" not in href:
+                    full_url = urljoin(url, href)
+                else:
+                    full_url = href
                 if '.pdf' in full_url or \
                     '.rar' in full_url or \
                         '.zip' in full_url:
                     list_pdf.append(full_url)
             return list_pdf
         except requests.RequestException as e:
-            print(f"Không thể truy cập URL {url}: {e}")
+            print(f"cannot access {url}: {e}")
             return ["0"]
 
     def get_title(self, url):
-        response = requests.get(url, verify=False)
+        try:
+            response = requests.get(url, verify=False)
+        except:
+            print("cannot access")
+            return "no title access"
         encoding = response.encoding if response.encoding else 'ISO-8859-1'
         soup = BeautifulSoup(response.content.decode(encoding), 'html.parser')
         try:
@@ -120,5 +127,6 @@ class FilterAndSave:
             list_attachs = self.check_file_exists(url)
 
             return list_attachs
-        except Exception:
+        except Exception as e:
+            # print(f"cannot find attach: {e}")
             return

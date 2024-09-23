@@ -8,7 +8,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics import accuracy_score, precision_score, \
     recall_score, f1_score
 
-nltk.download('stopwords')
+# nltk.download('stopwords')
 hot_words = ["tuyển dụng", "công chức"]
 
 

@@ -7,7 +7,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics import accuracy_score, precision_score, \
     recall_score, f1_score
 
-nltk.download('stopwords')
+# nltk.download('stopwords')
 
 
 def preprocess_text(text):
